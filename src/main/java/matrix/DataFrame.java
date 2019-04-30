@@ -97,7 +97,7 @@ public class DataFrame {
     }
 
     public int rowSize() {
-        return data.rowKeySet().size();
+        return innerUserMap.size();
     }
 
     public SortedSet<Integer> getRowIndices() {
@@ -109,7 +109,7 @@ public class DataFrame {
     }
 
     public int columnSize() {
-        return data.columnKeySet().size();
+        return innerItemMap.size();
     }
 
     @Deprecated

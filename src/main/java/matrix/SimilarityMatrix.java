@@ -1,10 +1,10 @@
 package matrix;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import utils.Maths;
 
 import java.io.FileWriter;
@@ -12,14 +12,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * @author Chenglong Ma
  */
 public class SimilarityMatrix {
     // matrix data
-    private final Table<String, String, String> data;
+    private final Table<String, String, CoFeature> data;
     // matrix dimension
     private int dim;
 
@@ -34,8 +34,7 @@ public class SimilarityMatrix {
      */
     public SimilarityMatrix(int dim) {
         this.dim = dim;
-        data = HashBasedTable.create(); // do not specify the cardinality here as a
-        // sparse matrix
+        data = HashBasedTable.create();
     }
 
     /**
@@ -50,61 +49,51 @@ public class SimilarityMatrix {
 
     public static SimilarityMatrix buildSimMat(DataFrame dataFrame, boolean isUser) {
         long start = System.currentTimeMillis();
-        Set<Set<Integer>> idCombs = Sets.combinations(dataFrame.getRowIndices(), 2);
-        SimilarityMatrix simMat = new SimilarityMatrix();
-//        AtomicInteger i = new AtomicInteger();
-        idCombs.parallelStream().forEach(ids -> {
-            assert ids.size() == 2;
-            Integer[] idArray = new Integer[ids.size()];
-            ids.toArray(idArray);
-            int thisId = idArray[0];
-            int thatId = idArray[1];
-            Map<Integer, Double> thisVector = isUser ? dataFrame.getRow(thisId) : dataFrame.getColumn(thisId);
-            Map<Integer, Double> thatVector = isUser ? dataFrame.getRow(thatId) : dataFrame.getColumn(thatId);
-
-            String feats = getCorrelation(thisVector, thatVector);
-            if (feats != null) {
-                simMat.put(thisId + "", thatId + "", feats);
-            } //else i.getAndIncrement();
-        });
-        long end = System.currentTimeMillis();
-        System.out.printf("Time cost: %.2f s\n", (end - start) / 1000D);
-//        System.out.println("Nan values: " + i.intValue());
-        return simMat;
-    }
-
-    public static SimilarityMatrix buildSimilarityMatrix(DataFrame dataFrame, boolean isUser) {
-        long start = System.currentTimeMillis();
         int numUsers = dataFrame.rowSize();
         int numItems = dataFrame.columnSize();
         int count = isUser ? numUsers : numItems;
 
-        SimilarityMatrix simMat = new SimilarityMatrix(count);
-        List<Integer> indexList = new ArrayList<>(isUser ? dataFrame.getRowIndices() : dataFrame.getColumnIndices());
-//        indexList.sort(Integer::compareTo);
-        indexList.parallelStream().forEach(thisIndex -> {
-            Map<Integer, Double> thisVector = isUser ? dataFrame.getRow(thisIndex) : dataFrame.getColumn(thisIndex);
-            if (!thisVector.isEmpty()) {
-                // user/item itself exclusive
-                for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
-                    Map<Integer, Double> thatVector = isUser ? dataFrame.getRow(thatIndex) : dataFrame.getColumn(thatIndex);
-                    if (thatVector.isEmpty()) {
-                        continue;
-                    }
-
-                    String feats = getCorrelation(thisVector, thatVector);
-                    if (feats != null) {
-                        String thisId = dataFrame.getRealId(thisIndex, isUser);
-                        String thatId = dataFrame.getRealId(thatIndex, isUser);
-                        simMat.put(thisId, thatId, feats);
-                    }
-                }
-            }
-        });
+        SimCollector simCollector = new SimCollector(dataFrame, isUser);
+        List<Integer> indices = new ArrayList<>();
+        IntStream.range(0, count).forEach(indices::add);
+        SimilarityMatrix simMat = indices.parallelStream().collect(simCollector);
         long end = System.currentTimeMillis();
         System.out.printf("Time cost: %.2f s\n", (end - start) / 1000D);
         return simMat;
     }
+
+//    public static SimilarityMatrix buildSimilarityMatrix(DataFrame dataFrame, boolean isUser) {
+//        long start = System.currentTimeMillis();
+//        int numUsers = dataFrame.rowSize();
+//        int numItems = dataFrame.columnSize();
+//        int count = isUser ? numUsers : numItems;
+//
+//        SimilarityMatrix simMat = new SimilarityMatrix(count);
+//        List<Integer> indexList = new ArrayList<>(isUser ? dataFrame.getRowIndices() : dataFrame.getColumnIndices());
+////        indexList.sort(Integer::compareTo);
+//        indexList.parallelStream().forEach(thisIndex -> {
+//            Map<Integer, Double> thisVector = isUser ? dataFrame.getRow(thisIndex) : dataFrame.getColumn(thisIndex);
+//            if (!thisVector.isEmpty()) {
+//                // user/item itself exclusive
+//                for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
+//                    Map<Integer, Double> thatVector = isUser ? dataFrame.getRow(thatIndex) : dataFrame.getColumn(thatIndex);
+//                    if (thatVector.isEmpty()) {
+//                        continue;
+//                    }
+//
+//                    CoFeature feats = getCorrelation(thisVector, thatVector);
+//                    if (feats != null) {
+//                        String thisId = dataFrame.getRealId(thisIndex, isUser);
+//                        String thatId = dataFrame.getRealId(thatIndex, isUser);
+//                        simMat.put(thisId, thatId, feats);
+//                    }
+//                }
+//            }
+//        });
+//        long end = System.currentTimeMillis();
+//        System.out.printf("Time cost: %.2f s\n", (end - start) / 1000D);
+//        return simMat;
+//    }
 
     /**
      * Find the common rated items by this user and that user, or the common
@@ -116,14 +105,11 @@ public class SimilarityMatrix {
      *                    item.
      * @return similarity
      */
-    public static String getCorrelation(Map<Integer, Double> thisVector, Map<Integer, Double> thatVector) {
+    public static CoFeature getCorrelation(Map<Integer, Double> thisVector, Map<Integer, Double> thatVector) {
         // compute similarity
         List<Double> thisList = new ArrayList<>();
         List<Double> thatList = new ArrayList<>();
 
-//        int thisPosition = 0, thatPosition = 0;
-//        int thisSize = thisVector.size(), thatSize = thatVector.size();
-//        int thisIndex, thatIndex;
         for (Integer id : thisVector.keySet()) {
             if (!thatVector.containsKey(id)) {
                 continue;
@@ -136,7 +122,7 @@ public class SimilarityMatrix {
         if (Double.isNaN(sim) || sim == 0.0) {
             return null;
         }
-        return String.format("%s,%d", sim, coSize);
+        return new CoFeature(sim, coSize);
     }
 
     /**
@@ -176,14 +162,14 @@ public class SimilarityMatrix {
      * @param col column index
      * @return value at entry (row, col)
      */
-    public String get(String row, String col) {
+    public CoFeature get(String row, String col) {
 
         if (data.contains(row, col))
             return data.get(row, col);
         else if (data.contains(col, row))
             return data.get(col, row);
 
-        return "0.0,0";
+        return new CoFeature(0, 0);
     }
 
     /**
@@ -211,12 +197,20 @@ public class SimilarityMatrix {
 //            data.put(col, row, val);
 //    }
 
-    public void put(String row, String col, String value) {
+    public void put(String row, String col, CoFeature value) {
         if (contains(row, col)) {
             return;
         }
         data.put(row, col, value);
 //        data.put(col, row, value);
+    }
+
+    public void putAll(Table<String, String, CoFeature> subset) {
+        data.putAll(subset);
+    }
+
+    public void putAll(SimilarityMatrix subMatrix) {
+        putAll(subMatrix.data);
     }
 
 //    /**
@@ -260,19 +254,20 @@ public class SimilarityMatrix {
     /**
      * @return the data
      */
-    public Table<String, String, String> getData() {
+    public Table<String, String, CoFeature> getData() {
         return data;
     }
 
-    public void toCSV(String resFilename) {
+    public void toCSV(@NonNull String resFilename, boolean append) {
         long start = System.currentTimeMillis();
         System.out.printf("Writing to %s...\n", resFilename);
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(resFilename), CSVFormat.DEFAULT)) {
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(resFilename, append), CSVFormat.DEFAULT)) {
             getData().cellSet().parallelStream().forEachOrdered(r -> {
                 try {
 //                    String value = String.format("%s,%s,%s", r.getRowKey(), r.getColumnKey(), r.getValue());
 //                    printer.print(value);
-                    printer.printRecord(r.getRowKey(), r.getColumnKey(), r.getValue());
+                    @NonNull CoFeature value = r.getValue();
+                    printer.printRecord(r.getRowKey(), r.getColumnKey(), value.similarity, value.coSize);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -290,5 +285,9 @@ public class SimilarityMatrix {
             return "Too large...";
         }
         return data.toString();
+    }
+
+    public int size() {
+        return data.size();
     }
 }

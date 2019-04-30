@@ -25,10 +25,10 @@ public class Main {
     private static void buildSim(DataFrame df, String resFilename) {
 
         System.out.println("Building Similarity Matrix...");
-        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimilarityMatrix(df, true);
-        System.out.println(similarityMatrix.getData().size());
+        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimMat(df, true);
+        System.out.println(similarityMatrix.size());
         System.out.println(similarityMatrix);
 //        similarityMatrix.getData().cellSet().parallelStream().forEachOrdered(System.out::println);
-        similarityMatrix.toCSV(resFilename);
+        similarityMatrix.toCSV(resFilename, false);
     }
 }
