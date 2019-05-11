@@ -39,8 +39,8 @@ public class DataFrame {
     /**
      * @param filename
      * @param sep
-     * @param headers
-     * @param readRows read rows if readRows > 0; read nothing if readRows == 0;
+     * @param headers  how many rows are headers, 0 for no header row
+     * @param readRows read rows if readRows > 0; read nothing if readRows == 0; read all if readRows < 0
      */
     public void read(String filename, String sep, int headers, int readRows) {
         Pattern pattern = Pattern.compile(sep);

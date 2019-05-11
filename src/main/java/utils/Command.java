@@ -46,6 +46,7 @@ public class Command {
         options.addOption(Opt.SEP, true, "The sep of file");
 
         options.addOption(Opt.HEADER, "header", true, "The number of headers");
+        options.addOption(Opt.ITEM_BASED, "item_based", false, "User based or Item based");
 
         return options;
     }
@@ -91,6 +92,10 @@ public class Command {
         return Integer.parseInt(getOption(Opt.HEADER, "1"));
     }
 
+    public boolean isUserBased() {
+        return !cmd.hasOption(Opt.ITEM_BASED);
+    }
+
     /**
      * The abbr options used for cli
      */
@@ -100,5 +105,6 @@ public class Command {
         static final String SOURCE_PATH = "src";
         static final String RESULT_PATH = "res";
         static final String SEP = "sep";
+        static final String ITEM_BASED = "item";
     }
 }

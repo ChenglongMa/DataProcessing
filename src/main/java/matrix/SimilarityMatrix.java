@@ -62,29 +62,29 @@ public class SimilarityMatrix {
         return simMat;
     }
 
-//    public static SimilarityMatrix buildSimilarityMatrix(DataFrame dataFrame, boolean isUser) {
+//    public static SimilarityMatrix buildSimilarityMatrix(DataFrame dataFrame, boolean isUserBased) {
 //        long start = System.currentTimeMillis();
 //        int numUsers = dataFrame.rowSize();
 //        int numItems = dataFrame.columnSize();
-//        int count = isUser ? numUsers : numItems;
+//        int count = isUserBased ? numUsers : numItems;
 //
 //        SimilarityMatrix simMat = new SimilarityMatrix(count);
-//        List<Integer> indexList = new ArrayList<>(isUser ? dataFrame.getRowIndices() : dataFrame.getColumnIndices());
+//        List<Integer> indexList = new ArrayList<>(isUserBased ? dataFrame.getRowIndices() : dataFrame.getColumnIndices());
 ////        indexList.sort(Integer::compareTo);
 //        indexList.parallelStream().forEach(thisIndex -> {
-//            Map<Integer, Double> thisVector = isUser ? dataFrame.getRow(thisIndex) : dataFrame.getColumn(thisIndex);
+//            Map<Integer, Double> thisVector = isUserBased ? dataFrame.getRow(thisIndex) : dataFrame.getColumn(thisIndex);
 //            if (!thisVector.isEmpty()) {
 //                // user/item itself exclusive
 //                for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
-//                    Map<Integer, Double> thatVector = isUser ? dataFrame.getRow(thatIndex) : dataFrame.getColumn(thatIndex);
+//                    Map<Integer, Double> thatVector = isUserBased ? dataFrame.getRow(thatIndex) : dataFrame.getColumn(thatIndex);
 //                    if (thatVector.isEmpty()) {
 //                        continue;
 //                    }
 //
 //                    CoFeature feats = getCorrelation(thisVector, thatVector);
 //                    if (feats != null) {
-//                        String thisId = dataFrame.getRealId(thisIndex, isUser);
-//                        String thatId = dataFrame.getRealId(thatIndex, isUser);
+//                        String thisId = dataFrame.getRealId(thisIndex, isUserBased);
+//                        String thatId = dataFrame.getRealId(thatIndex, isUserBased);
 //                        simMat.put(thisId, thatId, feats);
 //                    }
 //                }
