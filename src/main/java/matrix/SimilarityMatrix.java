@@ -47,13 +47,11 @@ public class SimilarityMatrix {
         data = HashBasedTable.create(mat.data);
     }
 
-    public static SimilarityMatrix buildSimMat(DataFrame dataFrame, boolean isUser) {
+    public static SimilarityMatrix buildSimMat(DataFrame dataFrame) {
         long start = System.currentTimeMillis();
-        int numUsers = dataFrame.rowSize();
-        int numItems = dataFrame.columnSize();
-        int count = isUser ? numUsers : numItems;
+        int count = dataFrame.rowSize();
 
-        SimCollector simCollector = new SimCollector(dataFrame, isUser);
+        SimCollector simCollector = new SimCollector(dataFrame);
         List<Integer> indices = new ArrayList<>();
         IntStream.range(0, count).forEach(indices::add);
         SimilarityMatrix simMat = indices.parallelStream().collect(simCollector);

@@ -42,7 +42,7 @@ public class DataFrame {
      * @param headers  how many rows are headers, 0 for no header row
      * @param readRows read rows if readRows > 0; read nothing if readRows == 0; read all if readRows < 0
      */
-    public void read(String filename, String sep, int headers, int readRows) {
+    public void read(String filename, String sep, int headers, int readRows, boolean isUser) {
         Pattern pattern = Pattern.compile(sep);
         try (Source fileSource = Okio.source(new File(filename));
              BufferedSource bufferedSource = Okio.buffer(fileSource)) {
@@ -55,7 +55,7 @@ public class DataFrame {
                     continue;
                 }
                 String[] eachRow = pattern.split(temp);
-                add(eachRow);
+                add(isUser, eachRow);
                 readRows--;
             }
         } catch (IOException e) {
@@ -63,10 +63,10 @@ public class DataFrame {
         }
     }
 
-    public void add(String... eachRow) {
+    public void add(boolean isUser, String... eachRow) {
         assert eachRow.length >= 3;
-        String u_id = eachRow[0];
-        String i_id = eachRow[1];
+        String u_id = eachRow[isUser ? 0 : 1];
+        String i_id = eachRow[isUser ? 1 : 0];
         int u_inner_id = putIfAbsent(u_id, innerUserMap);
         int i_inner_id = putIfAbsent(i_id, innerItemMap);
         double rating = Double.parseDouble(eachRow[2]);

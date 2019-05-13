@@ -16,15 +16,11 @@ import static matrix.SimilarityMatrix.getCorrelation;
  */
 public class SimCollector implements Collector<Integer, SimCollector.Container, SimilarityMatrix> {
     private final DataFrame dataFrame;
-    private final boolean isUser;
     private final int count;
 
-    public SimCollector(DataFrame dataFrame, boolean isUser) {
+    public SimCollector(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
-        this.isUser = isUser;
-        int numUsers = dataFrame.rowSize();
-        int numItems = dataFrame.columnSize();
-        this.count = isUser ? numUsers : numItems;
+        this.count = dataFrame.rowSize();
     }
 
     @Override
@@ -61,19 +57,19 @@ public class SimCollector implements Collector<Integer, SimCollector.Container, 
         }
 
         void accumulate(int thisIndex) {
-            Map<Integer, Double> thisVector = isUser ? dataFrame.getRow(thisIndex) : dataFrame.getColumn(thisIndex);
+            Map<Integer, Double> thisVector = dataFrame.getRow(thisIndex);
             if (!thisVector.isEmpty()) {
                 // user/item itself exclusive
                 for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
-                    Map<Integer, Double> thatVector = isUser ? dataFrame.getRow(thatIndex) : dataFrame.getColumn(thatIndex);
+                    Map<Integer, Double> thatVector = dataFrame.getRow(thatIndex);
                     if (thatVector.isEmpty()) {
                         continue;
                     }
 
                     CoFeature feats = getCorrelation(thisVector, thatVector);
                     if (feats != null) {
-                        String thisId = dataFrame.getRealId(thisIndex, isUser);
-                        String thatId = dataFrame.getRealId(thatIndex, isUser);
+                        String thisId = dataFrame.getRealId(thisIndex, true);
+                        String thatId = dataFrame.getRealId(thatIndex, true);
                         matrix.put(thisId, thatId, feats);
                     }
                 }
