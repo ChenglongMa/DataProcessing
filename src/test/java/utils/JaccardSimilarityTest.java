@@ -18,7 +18,7 @@ public class JaccardSimilarityTest {
     public void getSimilarity() {
         List<Integer> a = Arrays.asList(1, 0, 0);
         List<Integer> b = Arrays.asList(1, 1, 1);
-        double sim = new JaccardSimilarity().getSimilarity(a, b);
+        double sim = JaccardSimilarity.getInstance().getSimilarity(a, b);
         assertEquals(1 - 0.66, sim, 0.01);
     }
 
