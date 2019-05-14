@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-import static matrix.SimilarityMatrix.getCorrelation;
+import static matrix.SimilarityMatrix.getCoFeature;
 
 /**
  * @author Chenglong Ma
@@ -66,7 +66,7 @@ public class SimCollector implements Collector<Integer, SimCollector.Container, 
                         continue;
                     }
 
-                    CoFeature feats = getCorrelation(thisVector, thatVector);
+                    CoFeature feats = getCoFeature(thisVector, thatVector);
                     if (feats != null) {
                         String thisId = dataFrame.getRealId(thisIndex, true);
                         String thatId = dataFrame.getRealId(thatIndex, true);

@@ -5,7 +5,9 @@ import com.google.common.collect.Table;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import utils.Maths;
+import utils.CosSimilarity;
+import utils.JaccardSimilarity;
+import utils.PccSimilarity;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,6 +20,9 @@ import java.util.stream.IntStream;
  * @author Chenglong Ma
  */
 public class SimilarityMatrix {
+    private static final PccSimilarity PCC = PccSimilarity.getInstance();
+    private static final CosSimilarity COS = CosSimilarity.getInstance();
+    private static final JaccardSimilarity JACCARD = JaccardSimilarity.getInstance();
     // matrix data
     private final Table<String, String, CoFeature> data;
     // matrix dimension
@@ -60,39 +65,6 @@ public class SimilarityMatrix {
         return simMat;
     }
 
-//    public static SimilarityMatrix buildSimilarityMatrix(DataFrame dataFrame, boolean isUserBased) {
-//        long start = System.currentTimeMillis();
-//        int numUsers = dataFrame.rowSize();
-//        int numItems = dataFrame.columnSize();
-//        int count = isUserBased ? numUsers : numItems;
-//
-//        SimilarityMatrix simMat = new SimilarityMatrix(count);
-//        List<Integer> indexList = new ArrayList<>(isUserBased ? dataFrame.getRowIndices() : dataFrame.getColumnIndices());
-////        indexList.sort(Integer::compareTo);
-//        indexList.parallelStream().forEach(thisIndex -> {
-//            Map<Integer, Double> thisVector = isUserBased ? dataFrame.getRow(thisIndex) : dataFrame.getColumn(thisIndex);
-//            if (!thisVector.isEmpty()) {
-//                // user/item itself exclusive
-//                for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
-//                    Map<Integer, Double> thatVector = isUserBased ? dataFrame.getRow(thatIndex) : dataFrame.getColumn(thatIndex);
-//                    if (thatVector.isEmpty()) {
-//                        continue;
-//                    }
-//
-//                    CoFeature feats = getCorrelation(thisVector, thatVector);
-//                    if (feats != null) {
-//                        String thisId = dataFrame.getRealId(thisIndex, isUserBased);
-//                        String thatId = dataFrame.getRealId(thatIndex, isUserBased);
-//                        simMat.put(thisId, thatId, feats);
-//                    }
-//                }
-//            }
-//        });
-//        long end = System.currentTimeMillis();
-//        System.out.printf("Time cost: %.2f s\n", (end - start) / 1000D);
-//        return simMat;
-//    }
-
     /**
      * Find the common rated items by this user and that user, or the common
      * users have rated this item or that item. And then return the similarity.
@@ -103,7 +75,7 @@ public class SimilarityMatrix {
      *                    item.
      * @return similarity
      */
-    public static CoFeature getCorrelation(Map<Integer, Double> thisVector, Map<Integer, Double> thatVector) {
+    public static CoFeature getCoFeature(Map<Integer, Double> thisVector, Map<Integer, Double> thatVector) {
         // compute similarity
         List<Double> thisList = new ArrayList<>();
         List<Double> thatList = new ArrayList<>();
@@ -116,41 +88,13 @@ public class SimilarityMatrix {
             thatList.add(thatVector.get(id));
         }
         int coSize = thatList.size();
-        double sim = getSimilarity(thisList, thatList);
-        if (Double.isNaN(sim) || sim == 0.0) {
+        double pcc = PCC.getSimilarity(thisList, thatList);
+        double cos = COS.getSimilarity(thisList, thatList);
+        double jaccard = JACCARD.getSimilarity(thisList, thatList);
+        if (Double.isNaN(pcc) || pcc == 0.0) {
             return null;
         }
-        return new CoFeature(sim, coSize);
-    }
-
-    /**
-     * Calculate the similarity between thisList and thatList.
-     *
-     * @param thisList this list
-     * @param thatList that list
-     * @return similarity
-     */
-    public static double getSimilarity(List<? extends Number> thisList, List<? extends Number> thatList) {
-        // compute similarity
-
-        if (thisList == null || thatList == null || thisList.size() < 2 || thatList.size() < 2 || thisList.size() != thatList.size()) {
-            return Double.NaN;
-        }
-
-        double thisMu = Maths.mean(thisList);
-        double thatMu = Maths.mean(thatList);
-
-        double num = 0.0, thisPow2 = 0.0, thatPow2 = 0.0;
-        for (int i = 0; i < thisList.size(); i++) {
-            double thisMinusMu = thisList.get(i).doubleValue() - thisMu;
-            double thatMinusMu = thatList.get(i).doubleValue() - thatMu;
-
-            num += thisMinusMu * thatMinusMu;
-            thisPow2 += thisMinusMu * thisMinusMu;
-            thatPow2 += thatMinusMu * thatMinusMu;
-        }
-
-        return num / (Math.sqrt(thisPow2) * Math.sqrt(thatPow2));
+        return new CoFeature(pcc, cos, jaccard, coSize);
     }
 
     /**
@@ -167,7 +111,7 @@ public class SimilarityMatrix {
         else if (data.contains(col, row))
             return data.get(col, row);
 
-        return new CoFeature(0, 0);
+        return new CoFeature(0, 0, 0, 0);
     }
 
     /**
@@ -265,7 +209,7 @@ public class SimilarityMatrix {
 //                    String value = String.format("%s,%s,%s", r.getRowKey(), r.getColumnKey(), r.getValue());
 //                    printer.print(value);
                     @NonNull CoFeature value = r.getValue();
-                    printer.printRecord(r.getRowKey(), r.getColumnKey(), value.similarity, value.coSize);
+                    printer.printRecord(r.getRowKey(), r.getColumnKey(), value.pcc, value.cos, value.jaccard, value.coSize);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

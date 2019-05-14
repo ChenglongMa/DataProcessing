@@ -33,14 +33,14 @@ public class SimilarityMatrixTest {
     public void buildSimilarityMatrix() {
         int inner1 = df.getInnerId("1", true);
         int inner2 = df.getInnerId("2", true);
-        CoFeature sim = SimilarityMatrix.getCorrelation(df.getRow(inner1), df.getRow(inner2));
+        CoFeature sim = SimilarityMatrix.getCoFeature(df.getRow(inner1), df.getRow(inner2));
         System.out.println(sim);
         SimilarityMatrix sims = SimilarityMatrix.buildSimMat(df);
         System.out.println(sims);
         Assert.assertEquals(6, sims.size());
         CoFeature simInMat = sims.get("1", "2");
         System.out.println(simInMat);
-        Assert.assertEquals(sim.similarity, simInMat.similarity, 0.01);
+        Assert.assertEquals(sim.pcc, simInMat.pcc, 0.01);
         //14624338 + 3612217
         //18237780
     }
