@@ -88,12 +88,12 @@ public class SimilarityMatrix {
             thatList.add(thatVector.get(id));
         }
         int coSize = thatList.size();
-        double pcc = PCC.getSimilarity(thisList, thatList);
+        double pcc = 0;//PCC.getSimilarity(thisList, thatList);
         double cos = 0;
-        double jaccard = 0;
+//        double jaccard = 0;
 //        double cos = COS.getSimilarity(thisList, thatList);
-//        double jaccard = JACCARD.getSimilarity(thisList, thatList);
-        if (Double.isNaN(pcc) || pcc == 0.0) {
+        double jaccard = JACCARD.getSimilarity(thisList, thatList);
+        if (Double.isNaN(jaccard) || jaccard == 0.0) {
             return null;
         }
         return new CoFeature(pcc, cos, jaccard, coSize);
@@ -211,7 +211,7 @@ public class SimilarityMatrix {
 //                    String value = String.format("%s,%s,%s", r.getRowKey(), r.getColumnKey(), r.getValue());
 //                    printer.print(value);
                     @NonNull CoFeature value = r.getValue();
-                    printer.printRecord(r.getRowKey(), r.getColumnKey(), value.pcc,/* value.cos, value.jaccard,*/ value.coSize);
+                    printer.printRecord(r.getRowKey(), r.getColumnKey(), value.jaccard,/* value.cos, value.jaccard,*/ value.coSize);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

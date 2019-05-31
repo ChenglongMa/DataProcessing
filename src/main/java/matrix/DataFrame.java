@@ -64,7 +64,9 @@ public class DataFrame {
     }
 
     public void add(boolean isUser, String... eachRow) {
-        assert eachRow.length >= 3;
+        if (eachRow.length < 3) {
+            return;
+        }
         String u_id = eachRow[isUser ? 0 : 1];
         String i_id = eachRow[isUser ? 1 : 0];
         int u_inner_id = putIfAbsent(u_id, innerUserMap);
