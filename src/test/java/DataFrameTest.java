@@ -1,6 +1,7 @@
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import matrix.DataFrame;
+import matrix.SimilarityMatrix;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class DataFrameTest {
         String sep = "::";
         int headers = 0;
         int rows = -1;
-        df.read(filename, sep, headers, rows, false);
+        df.read(filename, sep, headers, rows, true);
     }
 
     @After
@@ -54,6 +55,17 @@ public class DataFrameTest {
         }
         long end = System.currentTimeMillis();
         System.out.printf("Size: %d\nTime cost: %.9f s\n", size, (end - start) / 1000D);
+    }
+
+    @Test
+    public void testSimBuilding() {
+        System.out.println("Building Similarity Matrix...");
+        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimMat(df);
+        System.out.println(similarityMatrix.size());
+        System.out.println(similarityMatrix);
+        similarityMatrix.toCSV("sim_jaccard.csv", false);
+        //pcc 14625479
+        // jaccard 17472510
     }
 
     @Test

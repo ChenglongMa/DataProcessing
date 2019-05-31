@@ -93,7 +93,8 @@ public class SimilarityMatrix {
 //        double jaccard = 0;
 //        double cos = COS.getSimilarity(thisList, thatList);
         double jaccard = JACCARD.getSimilarity(thisList, thatList);
-        if (Double.isNaN(jaccard) || jaccard == 0.0) {
+        if (Double.isNaN(jaccard)) {
+//        if (Double.isNaN(pcc) || pcc == 0.0) {
             return null;
         }
         return new CoFeature(pcc, cos, jaccard, coSize);
