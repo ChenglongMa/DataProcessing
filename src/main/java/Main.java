@@ -25,13 +25,13 @@ public class Main {
         int headers = cmd.getNumOfHeaders();
         DataFrame df = new DataFrame();
         df.read(trainFile, sep, headers, readRows);
-        df.readTest(testFile, sep, headers, readRows);
         System.out.printf("Ratings: %d\n", df.size());
         System.out.printf("Users: %d\n", df.rowSize());
         System.out.printf("Items: %d\n", df.columnSize());
         if (isSimOnly) {
             buildSim(df, resFilename);
         } else {
+            df.readTest(testFile, sep, headers, readRows);
             buildFeatureSet(df, isUser, resFilename);
         }
     }
