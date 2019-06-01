@@ -21,7 +21,7 @@ public class SimilarityMatrixTest {
         String sep = "[ \t,]+";
         int headers = 0;
         int rows = -1;
-        df.read(filename, sep, headers, rows, false);
+        df.read(filename, sep, headers, rows);
     }
 
     @After
@@ -33,7 +33,7 @@ public class SimilarityMatrixTest {
     public void buildSimilarityMatrix() {
         int inner1 = df.getInnerId("1", true);
         int inner2 = df.getInnerId("2", true);
-        CoFeature sim = SimilarityMatrix.getCoFeature(df.getRow(inner1), df.getRow(inner2));
+        CoFeature sim = SimilarityMatrix.getCoFeature(df.getUserRatings(inner1), df.getUserRatings(inner2));
         System.out.println(sim);
         SimilarityMatrix sims = SimilarityMatrix.buildSimMat(df);
         System.out.println(sims);

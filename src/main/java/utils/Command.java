@@ -36,12 +36,13 @@ public class Command {
         //build options
         Options options = new Options();
 
-        Option.Builder datasetOpt = Option.builder(Opt.SOURCE_PATH)
-                .longOpt("source")
+        Option.Builder datasetOpt = Option.builder(Opt.TRAIN_PATH)
+                .longOpt("train_src")
                 .hasArgs()
                 .desc("The source file path\n---");
         options.addOption(datasetOpt.build());
 
+        options.addOption(Opt.TEST_PATH, "test", true, "The test set file path\n---");
         options.addOption(Opt.RESULT_PATH, "result", true, "The result file path\n---");
         options.addOption(Opt.SEP, true, "The sep of file");
 
@@ -72,8 +73,12 @@ public class Command {
         }
     }
 
-    public String getSourceFile() {
-        return getOption(Opt.SOURCE_PATH, null);
+    public String getTrainFile() {
+        return getOption(Opt.TRAIN_PATH, null);
+    }
+
+    public String getTestFile() {
+        return getOption(Opt.TEST_PATH, null);
     }
 
     public String getResultFile() {
@@ -102,7 +107,8 @@ public class Command {
     private static class Opt {
         //        static final String RECOMMENDER = "r";
         static final String HEADER = "header";
-        static final String SOURCE_PATH = "src";
+        static final String TRAIN_PATH = "train";
+        static final String TEST_PATH = "test";
         static final String RESULT_PATH = "res";
         static final String SEP = "sep";
         static final String ITEM_BASED = "item";

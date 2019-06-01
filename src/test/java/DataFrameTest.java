@@ -23,7 +23,7 @@ public class DataFrameTest {
         String sep = "::";
         int headers = 0;
         int rows = -1;
-        df.read(filename, sep, headers, rows, true);
+        df.read(filename, sep, headers, rows);
     }
 
     @After
@@ -37,7 +37,7 @@ public class DataFrameTest {
         long start = System.currentTimeMillis();
         long size = 0;
         for (int i = 0; i < count; i++) {
-            Map<Integer, Double> row = df.getRow(i);
+            Map<Integer, Double> row = df.getUserRatings(i);
             size += row.size();
         }
         long end = System.currentTimeMillis();

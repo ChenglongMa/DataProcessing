@@ -25,31 +25,9 @@ public class SimilarityMatrix {
     private static final JaccardSimilarity JACCARD = JaccardSimilarity.getInstance();
     // matrix data
     private final Table<String, String, CoFeature> data;
-    // matrix dimension
-    private int dim;
 
     public SimilarityMatrix() {
         data = HashBasedTable.create();
-    }
-
-    /**
-     * Construct a symmetric matrix
-     *
-     * @param dim matrix dimension
-     */
-    public SimilarityMatrix(int dim) {
-        this.dim = dim;
-        data = HashBasedTable.create();
-    }
-
-    /**
-     * Construct a symmetric matrix by deeply copying data from a given matrix
-     *
-     * @param mat a given matrix
-     */
-    public SimilarityMatrix(SimilarityMatrix mat) {
-        dim = mat.dim;
-        data = HashBasedTable.create(mat.data);
     }
 
     public static SimilarityMatrix buildSimMat(DataFrame dataFrame) {
@@ -188,13 +166,6 @@ public class SimilarityMatrix {
 //
 //        return map;
 //    }
-
-    /**
-     * @return the dim
-     */
-    public int getDim() {
-        return dim;
-    }
 
     /**
      * @return the data
