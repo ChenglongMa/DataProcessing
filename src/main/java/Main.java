@@ -15,6 +15,7 @@ public class Main {
         String resFilename = cmd.getResultFile();
         String sep = cmd.getSeparator();
         boolean isUser = cmd.isUserBased();
+        boolean isSimOnly = cmd.isSimOnly();
         System.out.printf("cmd params:\nfilename: %s\n", trainFile);
         System.out.printf("result filename: %s\n", resFilename);
         System.out.printf("sep: %s\n", sep);
@@ -28,7 +29,11 @@ public class Main {
         System.out.printf("Ratings: %d\n", df.size());
         System.out.printf("Users: %d\n", df.rowSize());
         System.out.printf("Items: %d\n", df.columnSize());
-        buildFeatureSet(df, isUser, resFilename);
+        if (isSimOnly) {
+            buildSim(df, resFilename);
+        } else {
+            buildFeatureSet(df, isUser, resFilename);
+        }
     }
 
     private static void buildSim(DataFrame df, String resFilename) {

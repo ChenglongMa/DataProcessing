@@ -48,6 +48,7 @@ public class Command {
 
         options.addOption(Opt.HEADER, "header", true, "The number of headers");
         options.addOption(Opt.ITEM_BASED, "item_based", false, "User based or Item based");
+        options.addOption(Opt.SIM_ONLY, "sim_only", false, "Generate sim mat only");
 
         return options;
     }
@@ -101,6 +102,10 @@ public class Command {
         return !cmd.hasOption(Opt.ITEM_BASED);
     }
 
+    public boolean isSimOnly() {
+        return cmd.hasOption(Opt.SIM_ONLY);
+    }
+
     /**
      * The abbr options used for cli
      */
@@ -112,5 +117,6 @@ public class Command {
         static final String RESULT_PATH = "res";
         static final String SEP = "sep";
         static final String ITEM_BASED = "item";
+        static final String SIM_ONLY = "sim";
     }
 }

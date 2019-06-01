@@ -58,20 +58,22 @@ public class SimCollector implements Collector<Integer, SimCollector.Container, 
 
         void accumulate(int thisIndex) {
             Map<Integer, Double> thisVector = dataFrame.getUserRatings(thisIndex);
-            if (!thisVector.isEmpty()) {
-                // user/item itself exclusive
-                for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
-                    Map<Integer, Double> thatVector = dataFrame.getUserRatings(thatIndex);
-                    if (thatVector.isEmpty()) {
-                        continue;
-                    }
+            if (thisVector.isEmpty()) {
+                return;
+            }
+            String thisId = dataFrame.getRealId(thisIndex, true);
+            // user/item itself exclusive
+            for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
+                Map<Integer, Double> thatVector = dataFrame.getUserRatings(thatIndex);
+                if (thatVector.isEmpty()) {
+                    continue;
+                }
 
-                    CoFeature feats = getCoFeature(thisVector, thatVector);
-                    if (feats != null) {
-                        String thisId = dataFrame.getRealId(thisIndex, true);
-                        String thatId = dataFrame.getRealId(thatIndex, true);
-                        matrix.put(thisId, thatId, feats);
-                    }
+                CoFeature feats = getCoFeature(thisVector, thatVector);
+                if (feats != null) {
+
+                    String thatId = dataFrame.getRealId(thatIndex, true);
+                    matrix.put(thisId, thatId, feats);
                 }
             }
         }
