@@ -106,20 +106,6 @@ public class SimilarityMatrix {
         return data.contains(row, col) || data.contains(col, row);
     }
 
-//    /**
-//     * set a value to entry (row, col)
-//     *
-//     * @param row row index
-//     * @param col column index
-//     * @param val value to set
-//     */
-//    public void set(String row, String col, double val) {
-//        if (row >= col)
-//            data.put(row, col, val);
-//        else
-//            data.put(col, row, val);
-//    }
-
     public void put(String row, String col, CoFeature value) {
         if (contains(row, col)) {
             return;
@@ -135,37 +121,6 @@ public class SimilarityMatrix {
     public void putAll(SimilarityMatrix subMatrix) {
         putAll(subMatrix.data);
     }
-
-//    /**
-//     * plus a value to entry (row, col)
-//     *
-//     * @param row row index
-//     * @param col column index
-//     * @param val value to plus
-//     */
-//    public void add(int row, int col, double val) {
-//        if (row >= col)
-//            data.put(row, col, val + get(row, col));
-//        else
-//            data.put(col, row, val + get(col, row));
-//    }
-
-//    /**
-//     * Retrieve a complete row of similar items
-//     *
-//     * @param row row index
-//     * @return a complete row of similar items
-//     */
-//    public Map<Integer, Double> row(int row) {
-//        Map<Integer, Double> map = new HashMap<>();
-//        for (int col = 0; col < dim; col++) {
-//            double val = get(row, col);
-//            if (val != 0)
-//                map.put(col, val);
-//        }
-//
-//        return map;
-//    }
 
     /**
      * @return the data

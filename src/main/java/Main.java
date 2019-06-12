@@ -2,7 +2,8 @@ import matrix.DataFrame;
 import matrix.SimilarityMatrix;
 import utils.Command;
 
-import static matrix.FeatCollector.buildFeatureSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Chenglong Ma
@@ -32,7 +33,21 @@ public class Main {
             buildSim(df, resFilename);
         } else {
             df.readTest(testFile, sep, headers, readRows);
-            buildFeatureSet(df, isUser, resFilename);
+//            buildFeatureSet(df, isUser, resFilename);
+//            CountCollector.build(df,isUser,resFilename);
+            Set<Integer> indices = df.getTestUserInnerIds();
+            System.out.println(indices.size());
+            int trueVal = 0, falseVal = 0;
+            for (Integer index : indices) {
+                Map ratings = df.getUserRatings(index);
+                if (ratings == null || ratings.isEmpty()) {
+                    falseVal++;
+                } else {
+                    trueVal++;
+                }
+            }
+            System.out.println("True: " + trueVal);
+            System.out.println("False: " + falseVal);
         }
     }
 

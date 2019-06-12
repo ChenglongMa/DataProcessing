@@ -70,11 +70,8 @@ public class SimCollector implements Collector<Integer, SimCollector.Container, 
                 }
 
                 CoFeature feats = getCoFeature(thisVector, thatVector);
-                if (feats != null) {
-
-                    String thatId = dataFrame.getRealId(thatIndex, true);
-                    matrix.put(thisId, thatId, feats);
-                }
+                String thatId = dataFrame.getRealId(thatIndex, true);
+                matrix.put(thisId, thatId, feats);
             }
         }
 
