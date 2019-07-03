@@ -1,9 +1,7 @@
+import matrix.CountCollector;
 import matrix.DataFrame;
 import matrix.SimilarityMatrix;
 import utils.Command;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Chenglong Ma
@@ -21,6 +19,8 @@ public class Main {
         System.out.printf("result filename: %s\n", resFilename);
         System.out.printf("sep: %s\n", sep);
         System.out.printf("user based: %s\n", isUser);
+        System.out.printf("Sim only: %s\n", isSimOnly);
+
         int readRows = -1;
 //        int readRows = args.length > 2 ? Integer.parseInt(args[2]) : -1;
         int headers = cmd.getNumOfHeaders();
@@ -30,31 +30,31 @@ public class Main {
         System.out.printf("Users: %d\n", df.rowSize());
         System.out.printf("Items: %d\n", df.columnSize());
         if (isSimOnly) {
-            buildSim(df, resFilename);
+            buildSim(df, isUser, resFilename);
         } else {
             df.readTest(testFile, sep, headers, readRows);
 //            buildFeatureSet(df, isUser, resFilename);
-//            CountCollector.build(df,isUser,resFilename);
-            Set<Integer> indices = df.getTestUserInnerIds();
-            System.out.println(indices.size());
-            int trueVal = 0, falseVal = 0;
-            for (Integer index : indices) {
-                Map ratings = df.getUserRatings(index);
-                if (ratings == null || ratings.isEmpty()) {
-                    falseVal++;
-                } else {
-                    trueVal++;
-                }
-            }
-            System.out.println("True: " + trueVal);
-            System.out.println("False: " + falseVal);
+            CountCollector.build(df, isUser, resFilename);
+//            Set<Integer> indices = df.getTestUserInnerIds();
+//            System.out.println(indices.size());
+//            int trueVal = 0, falseVal = 0;
+//            for (Integer index : indices) {
+//                Map ratings = df.getUserRatings(index);
+//                if (ratings == null || ratings.isEmpty()) {
+//                    falseVal++;
+//                } else {
+//                    trueVal++;
+//                }
+//            }
+//            System.out.println("True: " + trueVal);
+//            System.out.println("False: " + falseVal);
         }
     }
 
-    private static void buildSim(DataFrame df, String resFilename) {
+    private static void buildSim(DataFrame df, boolean isUser, String resFilename) {
 
         System.out.println("Building Similarity Matrix...");
-        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimMat(df);
+        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimMat(df, isUser);
         System.out.println(similarityMatrix.size());
         System.out.println(similarityMatrix);
         similarityMatrix.toCSV(resFilename, false);

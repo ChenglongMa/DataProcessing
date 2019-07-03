@@ -39,6 +39,6 @@ public class PccSimilarity implements Similarity {
             thatPow2 += thatMinusMu * thatMinusMu;
         }
 
-        return num / (Math.sqrt(thisPow2) * Math.sqrt(thatPow2));
+        return num / (1 + Math.sqrt(thisPow2) * Math.sqrt(thatPow2));
     }
 }

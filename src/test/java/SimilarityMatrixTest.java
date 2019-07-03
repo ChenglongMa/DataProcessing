@@ -35,7 +35,7 @@ public class SimilarityMatrixTest {
         int inner2 = df.getInnerId("2", true);
         CoFeature sim = SimilarityMatrix.getCoFeature(df.getUserRatings(inner1), df.getUserRatings(inner2));
         System.out.println(sim);
-        SimilarityMatrix sims = SimilarityMatrix.buildSimMat(df);
+        SimilarityMatrix sims = SimilarityMatrix.buildSimMat(df, true);
         System.out.println(sims);
         Assert.assertEquals(6, sims.size());
         CoFeature simInMat = sims.get("1", "2");
@@ -48,7 +48,7 @@ public class SimilarityMatrixTest {
     @Test
     public void testSave() {
         boolean isUser = false;
-        SimilarityMatrix sims = SimilarityMatrix.buildSimMat(df);
+        SimilarityMatrix sims = SimilarityMatrix.buildSimMat(df, isUser);
         System.out.println(sims);
         sims.toCSV("tmp.csv", false);
         Assert.assertEquals(6, sims.size());

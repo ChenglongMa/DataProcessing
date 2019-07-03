@@ -17,10 +17,12 @@ import static matrix.SimilarityMatrix.getCoFeature;
 public class SimCollector implements Collector<Integer, SimCollector.Container, SimilarityMatrix> {
     private final DataFrame dataFrame;
     private final int count;
+    private final boolean isUser;
 
-    public SimCollector(DataFrame dataFrame) {
+    public SimCollector(DataFrame dataFrame, int count, boolean isUser) {
         this.dataFrame = dataFrame;
-        this.count = dataFrame.rowSize();
+        this.count = count;
+        this.isUser = isUser;
     }
 
     @Override
@@ -56,22 +58,28 @@ public class SimCollector implements Collector<Integer, SimCollector.Container, 
             matrix = new SimilarityMatrix();
         }
 
+        Map<Integer, Double> getVector(int index) {
+            return isUser ? dataFrame.getUserRatings(index) : dataFrame.getItemRatings(index);
+        }
+
         void accumulate(int thisIndex) {
-            Map<Integer, Double> thisVector = dataFrame.getUserRatings(thisIndex);
+            Map<Integer, Double> thisVector = getVector(thisIndex);
             if (thisVector.isEmpty()) {
                 return;
             }
-            String thisId = dataFrame.getRealId(thisIndex, true);
+            String thisId = dataFrame.getRealId(thisIndex, isUser);
             // user/item itself exclusive
             for (int thatIndex = thisIndex + 1; thatIndex < count; thatIndex++) {
-                Map<Integer, Double> thatVector = dataFrame.getUserRatings(thatIndex);
+                Map<Integer, Double> thatVector = getVector(thatIndex);
                 if (thatVector.isEmpty()) {
                     continue;
                 }
 
                 CoFeature feats = getCoFeature(thisVector, thatVector);
-                String thatId = dataFrame.getRealId(thatIndex, true);
-                matrix.put(thisId, thatId, feats);
+                if (feats != null) {
+                    String thatId = dataFrame.getRealId(thatIndex, isUser);
+                    matrix.put(thisId, thatId, feats);
+                }
             }
         }
 

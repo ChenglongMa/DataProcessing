@@ -60,7 +60,7 @@ public class DataFrameTest {
     @Test
     public void testSimBuilding() {
         System.out.println("Building Similarity Matrix...");
-        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimMat(df);
+        SimilarityMatrix similarityMatrix = SimilarityMatrix.buildSimMat(df, true);
         System.out.println(similarityMatrix.size());
         System.out.println(similarityMatrix);
         similarityMatrix.toCSV("sim_jaccard.csv", false);
